@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Modify Booking | MARENA{% endblock %}
+
+{% block content %}
+<div class="booking-container">
+    <h1 class="page-title">Modify Booking</h1>
+    
+    <div class="booking-steps">
+        <div class="step active" id="step-1">
+            <span class="step-number">1</span>
+            <span class="step-text">Select Booking</span>
+        </div>
+        <div class="step" id="step-2">
+            <span class="step-number">2</span>
+            <span class="step-text">Choose New Time</span>
+        </div>
+        <div class="step" id="step-3">
+            <span class="step-number">3</span>
+            <span class="step-text">Confirm</span>
+        </div>
+    </div>
+    
+    <div class="bookings-list">
+        {% for id, slot_id, start, end, facility, facility_id in bookings %}
+        <div class="booking-card" data-booking-id="{{ id }}" data-slot-id="{{ slot_id }}" data-facility-id="{{ facility_id }}">
+            <div class="booking-info">
+                <h3>{{ facility }}</h3>
+                <p><i class="fas fa-clock"></i> {{ start }} - {{ end }}</p>
+                <p><i class="fas fa-calendar"></i> Tomorrow</p>
+            </div>
+            <button class="btn select-booking-btn">
+                Modify <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="new-slots-selection hidden">
+        <h2>Select New Time Slot</h2>
+        <div class="time-slots" id="new-time-slots">
+            <!-- New time slots will be loaded dynamically via JavaScript -->
+        </div>
+        <button class="btn back-btn mt-4" data-target="bookings">
+            <i class="fas fa-arrow-left"></i> Back to Bookings
+        </button>
+    </div>
+    
+    <div class="modification-confirmation hidden">
+        <h2>Confirm Your Changes</h2>
+        <div class="confirmation-details">
+            <p><strong>Facility:</strong> <span id="confirm-facility"></span></p>
+            <p><strong>Date:</strong> Tomorrow</p>
+            <p><strong>New Time:</strong> <span id="confirm-new-time"></span></p>
+        </div>
+        <form method="POST" action="{{ url_for('modify_booking') }}">
+            <input type="hidden" id="booking-id-input" name="booking_id">
+            <input type="hidden" id="new-slot-id-input" name="new_slot_id">
+            <div class="form-actions">
+                <button type="button" class="btn back-btn" data-target="slots">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button type="submit" class="btn btn-success">
+                    Confirm Changes <i class="fas fa-check"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline mt-6">
+        <i class="fas fa-home"></i> Back to Dashboard
+    </a>
+</div>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Booking selection
+        const bookingCards = document.querySelectorAll('.booking-card');
+        bookingCards.forEach(card => {
+            card.querySelector('.select-booking-btn').addEventListener('click', function() {
+                const bookingId = card.dataset.bookingId;
+                const slotId = card.dataset.slotId;
+                const facilityId = card.dataset.facilityId;
+                const facilityName = card.querySelector('h3').textContent;
+                
+                document.getElementById('booking-id-input').value = bookingId;
+                document.getElementById('confirm-facility').textContent = facilityName;
+                
+                // Update steps
+                document.getElementById('step-1').classList.remove('active');
+                document.getElementById('step-1').classList.add('completed');
+                document.getElementById('step-2').classList.add('active');
+                
+                // Hide bookings list, show new slots
+                document.querySelector('.bookings-list').classList.add('hidden');
+                document.querySelector('.new-slots-selection').classList.remove('hidden');
+                
+                // Load new slots via AJAX
+                const slotsContainer = document.getElementById('new-time-slots');
+                slotsContainer.innerHTML = '<p>Loading available slots...</p>';
+                
+                fetch(`/api/slots?facility_id=${facilityId}&booking_id=${bookingId}&current_slot_id=${slotId}`)
+                    .then(response => {
+                        console.log("Response status:", response.status);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("Received data:", data);
+                        
+                        if (data.error) {
+                            slotsContainer.innerHTML = `<p class="text-danger">${data.error}</p>`;
+                            return;
+                        }
+                        
+                        if (data.length === 0) {
+                            slotsContainer.innerHTML = '<p>No other available slots found for this facility.</p>';
+                            return;
+                        }
+                        
+                        slotsContainer.innerHTML = '';
+                        data.forEach(slot => {
+                            const slotElement = document.createElement('div');
+                            slotElement.className = 'time-slot';
+                            slotElement.dataset.slotId = slot.id;
+                            slotElement.innerHTML = `
+                                <span class="slot-time">${slot.start} - ${slot.end}</span>
+                                <span class="slot-capacity">${slot.capacity} slots left</span>
+                            `;
+                            
+                            slotElement.addEventListener('click', function() {
+                                // Remove selected class from all slots
+                                document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+                                // Add selected class to clicked slot
+                                this.classList.add('selected');
+                                
+                                const newSlotId = this.dataset.slotId;
+                                const timeText = this.querySelector('.slot-time').textContent;
+                                
+                                document.getElementById('new-slot-id-input').value = newSlotId;
+                                document.getElementById('confirm-new-time').textContent = timeText;
+                                
+                                // Update steps
+                                document.getElementById('step-2').classList.remove('active');
+                                document.getElementById('step-2').classList.add('completed');
+                                document.getElementById('step-3').classList.add('active');
+                                
+                                // Show confirmation
+                                document.querySelector('.new-slots-selection').classList.add('hidden');
+                                document.querySelector('.modification-confirmation').classList.remove('hidden');
+                            });
+                            
+                            slotsContainer.appendChild(slotElement);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading slots:', error);
+                        slotsContainer.innerHTML = '<p class="text-danger">Error loading slots. Please try again.</p>';
+                    });
+            });
+        });
+        
+        // Back buttons
+        document.querySelectorAll('.back-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.dataset.target;
+                
+                if (target === 'bookings') {
+                    // Back to bookings list
+                    document.getElementById('step-1').classList.add('active');
+                    document.getElementById('step-1').classList.remove('completed');
+                    document.getElementById('step-2').classList.remove('active');
+                    
+                    document.querySelector('.bookings-list').classList.remove('hidden');
+                    document.querySelector('.new-slots-selection').classList.add('hidden');
+                } else if (target === 'slots') {
+                    // Back to slots selection
+                    document.getElementById('step-2').classList.add('active');
+                    document.getElementById('step-2').classList.remove('completed');
+                    document.getElementById('step-3').classList.remove('active');
+                    
+                    document.querySelector('.new-slots-selection').classList.remove('hidden');
+                    document.querySelector('.modification-confirmation').classList.add('hidden');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | MARENA{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="welcome-banner">
+        <h1>Welcome, {{ user_name }}</h1>
+        <p>Manage your facility bookings</p>
+    </div>
+    
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+            <div class="stat-info">
+                <h3>Tomorrow</h3>
+                <p>Booking Date</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-building"></i></div>
+            <div class="stat-info">
+                <h3>Facilities</h3>
+                <p>Book your preferred slot</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="action-cards">
+        <a href="{{ url_for('book_slots') }}" class="card action-card">
+            <div class="card-icon"><i class="fas fa-plus-circle"></i></div>
+            <h3>Book Slot</h3>
+            <p>Reserve a new facility slot</p>
+        </a>
+        
+        <a href="{{ url_for('cancel_booking') }}" class="card action-card">
+            <div class="card-icon"><i class="fas fa-times-circle"></i></div>
+            <h3>Cancel Slot</h3>
+            <p>Cancel an existing booking</p>
+        </a>
+        
+        <a href="{{ url_for('modify_booking') }}" class="card action-card">
+            <div class="card-icon"><i class="fas fa-edit"></i></div>
+            <h3>Modify Slot</h3>
+            <p>Change booking details</p>
+        </a>
+    </div>
+</div>
+{% endblock %}

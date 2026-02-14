@@ -1,0 +1,153 @@
+/* Booking Layouts */
+.booking-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--spacing-6);
+  background-color: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.booking-steps {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-8);
+  position: relative;
+}
+
+.booking-steps::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--gray-300);
+  z-index: 1;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.step-number {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--gray-300);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-2);
+  font-weight: 600;
+}
+
+.step.active .step-number {
+  background-color: var(--primary-color);
+}
+
+.step.completed .step-number {
+  background-color: var(--success-color);
+}
+
+.step-text {
+  font-weight: 500;
+  color: var(--gray-600);
+}
+
+.step.active .step-text {
+  color: var(--primary-color);
+}
+
+.step.completed .step-text {
+  color: var(--success-color);
+}
+
+.facility-selection {
+  margin-bottom: var(--spacing-6);
+}
+
+.facility-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-4);
+}
+
+.time-selection {
+  margin-bottom: var(--spacing-6);
+}
+
+.time-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-4);
+}
+
+.booking-confirmation, .modification-confirmation {
+  background-color: var(--gray-100);
+  padding: var(--spacing-5);
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--spacing-6);
+}
+
+.confirmation-details {
+  margin-bottom: var(--spacing-4);
+}
+
+.confirmation-details p {
+  margin-bottom: var(--spacing-2);
+}
+
+.bookings-list {
+  margin-bottom: var(--spacing-6);
+}
+
+.new-slots-selection {
+  margin-bottom: var(--spacing-6);
+}
+
+.facility-icon {
+  width: 60px;
+  height: 60px;
+  background-color: var(--light-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--spacing-3);
+}
+
+.facility-icon i {
+  font-size: 24px;
+  color: var(--primary-color);
+}
+
+.slot-time {
+  display: block;
+  font-weight: 600;
+  margin-bottom: var(--spacing-1);
+}
+
+.slot-capacity {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--gray-600);
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-8) 0;
+}
+
+.empty-state i {
+  font-size: 48px;
+  color: var(--gray-400);
+  margin-bottom: var(--spacing-4);
+}

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Book Slot | MARENA{% endblock %}
+
+{% block content %}
+<div class="booking-container">
+    <h1 class="page-title">Book a Facility Slot</h1>
+    
+    <div class="booking-steps">
+        <div class="step active" id="step-1">
+            <span class="step-number">1</span>
+            <span class="step-text">Select Facility</span>
+        </div>
+        <div class="step" id="step-2">
+            <span class="step-number">2</span>
+            <span class="step-text">Choose Time</span>
+        </div>
+        <div class="step" id="step-3">
+            <span class="step-number">3</span>
+            <span class="step-text">Confirm</span>
+        </div>
+    </div>
+    
+    <div class="facility-selection">
+        <h2>Select a Facility</h2>
+        <div class="facility-cards">
+            {% for id, name in facilities %}
+            <div class="facility-card" data-facility-id="{{ id }}">
+                <div class="facility-icon">
+                    <i class="fas fa-dumbbell"></i>
+                </div>
+                <h3>{{ name }}</h3>
+                <button class="select-facility-btn">Select</button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="time-selection hidden">
+        <h2>Select Available Time</h2>
+        <div class="time-slots">
+            <!-- Time slots will be loaded dynamically via JavaScript -->
+        </div>
+        <button class="btn back-btn mt-4" data-target="facility">
+            <i class="fas fa-arrow-left"></i> Back to Facilities
+        </button>
+    </div>
+    
+    <div class="booking-confirmation hidden">
+        <h2>Confirm Your Booking</h2>
+        <div class="confirmation-details">
+            <p><strong>Facility:</strong> <span id="confirm-facility"></span></p>
+            <p><strong>Date:</strong> Tomorrow</p>
+            <p><strong>Time:</strong> <span id="confirm-time"></span></p>
+        </div>
+        <form method="POST" action="{{ url_for('book_slots') }}">
+            <input type="hidden" id="facility-input" name="facility">
+            <input type="hidden" id="slot-input" name="slot">
+            <div class="form-actions">
+                <button type="button" class="btn back-btn" data-target="time">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button type="submit" class="btn btn-success">
+                    Confirm Booking <i class="fas fa-check"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline mt-6">
+        <i class="fas fa-home"></i> Back to Dashboard
+    </a>
+</div>
+{% endblock %}
