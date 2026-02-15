@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 # ---------------- MySQL Connection ----------------
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY")
+app.secret_key = os.getenv("SECRET_KEY") or "fallback_dev_key"
 
 import os
 
