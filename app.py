@@ -18,12 +18,13 @@ app.secret_key = os.getenv("SECRET_KEY")
 import os
 
 db = mysql.connector.connect(
-    host=os.getenv("DB_HOST", "localhost"),
-    user=os.getenv("DB_USER", "root"),
-    password=os.getenv("DB_PASSWORD", ""),
-    database=os.getenv("DB_NAME", "marenaa"),
-    port=int(os.getenv("DB_PORT", 3306))
+    host=os.getenv("MYSQLHOST"),
+    user=os.getenv("MYSQLUSER"),
+    password=os.getenv("MYSQLPASSWORD"),
+    database=os.getenv("MYSQLDATABASE"),
+    port=int(os.getenv("MYSQLPORT"))
 )
+
 cursor = db.cursor()
 
 # ---------------- Helper Functions ----------------
@@ -457,5 +458,5 @@ def logout():
     flash("Logged out successfully.")
     return redirect(url_for('login'))
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
