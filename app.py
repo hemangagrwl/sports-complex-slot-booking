@@ -11,6 +11,7 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY") or "fallback_dev_key"
 
+
 # ---------------- Helper Functions ----------------
 def get_db_connection():
     return mysql.connector.connect(
@@ -42,10 +43,51 @@ def run_query(query, values=(), fetchone=False, fetchall=False):
     except mysql.connector.Error as err:
         print(f"Database error: {err}")
         return None if (fetchone or fetchall) else False
+    
+def maintain_slots():
+    today = datetime.today().date()
+    next_day = today + timedelta(days=1)
+
+    # Delete old slots
+    run_query("DELETE FROM slots WHERE date < %s", (today,))
+
+    # Check if slots for tomorrow exist
+    existing = run_query(
+        "SELECT COUNT(*) FROM slots WHERE date = %s",
+        (next_day,),
+        fetchone=True
+    )
+
+    if existing and existing[0] == 0:
+        # Get all facilities
+        facilities = run_query("SELECT id FROM facilities", fetchall=True)
+
+        # Time slots
+        morning = [("06:00:00","07:00:00"),
+                   ("07:00:00","08:00:00"),
+                   ("08:00:00","09:00:00")]
+
+        evening = [("16:00:00","17:00:00"),
+                   ("17:00:00","18:00:00"),
+                   ("18:00:00","19:00:00"),
+                   ("19:00:00","20:00:00"),
+                   ("20:00:00","21:00:00")]
+
+        all_slots = morning + evening
+
+        for facility in facilities:
+            for start, end in all_slots:
+                run_query(
+                    "INSERT INTO slots (facility_id, date, time_start, time_end) VALUES (%s, %s, %s, %s)",
+                    (facility[0], next_day, start, end)
+                )
+
+        print("Tomorrow slots auto-generated.")
 
 # ---------------- Routes ----------------
 @app.route('/', methods=['GET', 'POST'])
 def login():
+    maintain_slots()
     if request.method == 'POST':
         uid = request.form.get('user_id')
         pwd = request.form.get('password')
