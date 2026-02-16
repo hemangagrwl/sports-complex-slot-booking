@@ -11,33 +11,36 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY") or "fallback_dev_key"
 
-import os
-
-db = mysql.connector.connect(
-    host=os.getenv("MYSQLHOST"),
-    user=os.getenv("MYSQLUSER"),
-    password=os.getenv("MYSQLPASSWORD"),
-    database=os.getenv("MYSQLDATABASE"),
-    port=int(os.getenv("MYSQLPORT"))
-)
-
-cursor = db.cursor()
-
 # ---------------- Helper Functions ----------------
+def get_db_connection():
+    return mysql.connector.connect(
+        host=os.getenv("MYSQLHOST"),
+        user=os.getenv("MYSQLUSER"),
+        password=os.getenv("MYSQLPASSWORD"),
+        database=os.getenv("MYSQLDATABASE"),
+        port=int(os.getenv("MYSQLPORT"))
+    )
+
 def run_query(query, values=(), fetchone=False, fetchall=False):
     try:
+        db = get_db_connection()
+        cursor = db.cursor()
         cursor.execute(query, values)
+
         if fetchone:
-            return cursor.fetchone()
+            result = cursor.fetchone()
         elif fetchall:
-            return cursor.fetchall()
+            result = cursor.fetchall()
         else:
             db.commit()
-            return True
+            result = True
+
+        cursor.close()
+        db.close()
+        return result
+
     except mysql.connector.Error as err:
         print(f"Database error: {err}")
-        if not fetchone and not fetchall:
-            db.rollback()
         return None if (fetchone or fetchall) else False
 
 # ---------------- Routes ----------------
